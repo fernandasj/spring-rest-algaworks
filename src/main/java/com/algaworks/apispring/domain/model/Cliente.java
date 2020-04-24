@@ -1,5 +1,6 @@
 package com.algaworks.apispring.domain.model;
 
+import com.algaworks.apispring.domain.ValidationGroups;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
@@ -21,6 +23,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Cliente {
 
+    @NotNull(groups = ValidationGroups.ClienteId.class)
     @Id
     @GeneratedValue
     private Long id;
