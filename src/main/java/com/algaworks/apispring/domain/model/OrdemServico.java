@@ -1,21 +1,16 @@
 package com.algaworks.apispring.domain.model;
 
-import com.algaworks.apispring.domain.ValidationGroups;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.algaworks.apispring.domain.exception.NegocioException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.groups.ConvertGroup;
-import javax.validation.groups.Default;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Builder
@@ -30,26 +25,17 @@ public class OrdemServico {
     private Long id;
 
     @ManyToOne
-    @NotNull
-    @Valid
-    @ConvertGroup(from = Default.class, to = ValidationGroups.ClienteId.class)
     private Cliente cliente;
-
-    @NotBlank
     private String descricao;
-
-    @NotNull
     private BigDecimal preco;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private OffsetDateTime dataAbertura;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private OffsetDateTime dataFinalizacao;
 
     @Enumerated(EnumType.STRING)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private StatusOrdemServico status;
+
+    @OneToMany(mappedBy = "ordemServico")
+    private List<Comentario> comentarios = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
@@ -62,5 +48,22 @@ public class OrdemServico {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public boolean podeSerFinalizada(){
+        return StatusOrdemServico.ABERTA.equals(getStatus());
+    }
+
+    public boolean naoPodeSerFinalizada(){
+        return !podeSerFinalizada();
+    }
+
+    public void finalizar() {
+        if (naoPodeSerFinalizada()){
+            throw new NegocioException("Ordem de servico nao pode ser finalizada");
+        }
+
+        setStatus(StatusOrdemServico.FINALIZADA);
+        setDataFinalizacao(OffsetDateTime.now());
     }
 }

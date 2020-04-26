@@ -1,5 +1,6 @@
 package com.algaworks.apispring.api.exceptionhandler;
 
+import com.algaworks.apispring.domain.exception.EntidadeNaoEncontradaException;
 import com.algaworks.apispring.domain.exception.NegocioException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -28,6 +29,17 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NegocioException.class)
     public ResponseEntity<Object> handleNegocio( NegocioException ex, WebRequest request) {
         var status = HttpStatus.BAD_REQUEST;
+        var problema = new Problema();
+        problema.setStatus(status.value());
+        problema.setTitulo(ex.getMessage());
+        problema.setDataHora(OffsetDateTime.now());
+
+        return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
+    }
+
+    @ExceptionHandler(EntidadeNaoEncontradaException.class)
+    public ResponseEntity<Object> handleEntidadeNaoEncontrada( EntidadeNaoEncontradaException ex, WebRequest request) {
+        var status = HttpStatus.NOT_FOUND;
         var problema = new Problema();
         problema.setStatus(status.value());
         problema.setTitulo(ex.getMessage());
